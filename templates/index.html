@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div class="container">
+        <h1>Resume Analyzer</h1>
+        <p>Upload a PDF resume to extract and analyze its content using AI.</p>
+        <form id="upload-form">
+            <div class="file-input-wrapper">
+                <button type="button" class="btn-file-dummy">Choose File</button>
+                <input type="file" id="resume-file" name="resume" accept=".pdf" required>
+                <span id="file-name-display">No file selected</span>
+            </div>
+            <button type="submit" class="btn-submit">Analyze Resume</button>
+        </form>
+        <div id="loader" class="loader hidden"></div>
+        <div id="error-display" class="error-box hidden"></div>
+
+        <div id="results" class="results-box hidden">
+            <h2>Analysis Results</h2>
+            <pre><code id="json-output" class="language-json"></code></pre>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <script>
+        // --- (All your existing const declarations remain the same) ---
+        const uploadForm = document.getElementById('upload-form');
+        const resumeFile = document.getElementById('resume-file');
+        const loader = document.getElementById('loader');
+        const resultsDiv = document.getElementById('results');
+        const errorDiv = document.getElementById('error-display');
+        const jsonOutput = document.getElementById('json-output'); // This now targets the <code> tag
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const fileDummyBtn = document.querySelector('.btn-file-dummy');
+
+        // --- (All your existing event listeners remain the same) ---
+        fileDummyBtn.addEventListener('click', () => resumeFile.click());
+        resumeFile.addEventListener('change', () => {
+            fileNameDisplay.textContent = resumeFile.files.length > 0 ? resumeFile.files[0].name : 'No file selected';
+        });
+
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            resultsDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('resume', resumeFile.files[0]);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'An unknown error occurred.');
+
+                // 4. UPDATE HOW THE RESULT IS DISPLAYED
+                //    - First, set the content of the <code> block.
+                //    - Then, tell Prism to find and highlight it.
+                jsonOutput.textContent = JSON.stringify(data, null, 2);
+                Prism.highlightElement(jsonOutput); // Trigger highlighting
+
+                resultsDiv.classList.remove('hidden');
+
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

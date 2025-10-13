@@ -1,0 +1,12 @@
+# Python virtual environment
+venv/
+
+# Environment variables file (contains secrets)
+.env
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Uploaded resume files
+uploaded_resumes/
