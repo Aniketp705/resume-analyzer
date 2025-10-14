@@ -9,15 +9,15 @@ def analyze_resume_text(resume_text: str) -> dict | None:
         api_key = os.environ.get("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY not found or is empty in your .env file.")
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=api_key) # type: ignore
     except Exception as e:
         print(f"🛑 CONFIGURATION ERROR: {e}")
         return None
 
     # --- 2. Call the Gemini API ---
     try:
-        generation_config = genai.GenerationConfig(response_mime_type="application/json")
-        model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config)
+        generation_config = genai.GenerationConfig(response_mime_type="application/json") # type: ignore
+        model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config) # type: ignore
         
         # 🎯 THE NEW, DETAILED PROMPT FOR OPTIMAL EXTRACTION
         prompt = f"""
