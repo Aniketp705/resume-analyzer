@@ -1,50 +1,41 @@
-import json
 import os
+import google.generativeai as genai
+from dotenv import load_dotenv
 
-# Import the specific functions from your new modules
-from core_logic.extractor import extract_text_from_pdf
-from core_logic.analyzer import analyze_resume_text
-
-# --- Configuration ---
-# 🎯 Make sure a resume file exists at this path for testing
-TEST_RESUME_PATH = "uploaded_resumes/resume.pdf"
-
-def main():
+def check_available_models():
     """
-    A simple script to test the extractor and analyzer modules.
+    Configures the Gemini API and lists all models that support 'generateContent'.
     """
-    print("--- 🧪 Starting Test ---")
+    # --- 1. Configure and Validate API Key ---
+    try:
+        load_dotenv()
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not found or is empty in your .env file.")
+        genai.configure(api_key=api_key)
+        print("✅ API Key configured successfully. Fetching available models...\n")
+    except Exception as e:
+        print(f"🛑 CONFIGURATION FAILED: {e}")
+        print("   Please ensure a .env file is in the project's root directory")
+        print("   and contains the line: GOOGLE_API_KEY='YourActualKey'")
+        return
+
+    # --- 2. List Models that Support the Required Method ---
+    print("--- Models that support 'generateContent' ---")
+    found_models = False
+    for model in genai.list_models():
+      # We only want to see models that can actually generate text for our prompts
+      if 'generateContent' in model.supported_generation_methods:
+        # The model names from the API are 'models/model-name'
+        # We'll clean it up to show just 'model-name'
+        model_name = model.name.replace("models/", "")
+        print(f"✅ {model_name}")
+        found_models = True
     
-    if not os.path.exists(TEST_RESUME_PATH):
-        print(f"🛑 TEST FAILED: The test file was not found at '{TEST_RESUME_PATH}'")
-        return
-
-    # --- Step 1: Test the Extractor ---
-    print(f"📄 Step 1: Extracting text from '{TEST_RESUME_PATH}'...")
-    extracted_text = extract_text_from_pdf(TEST_RESUME_PATH)
-
-    if not extracted_text:
-        print("🛑 TEST FAILED: Text extraction returned nothing.")
-        return
+    if not found_models:
+        print("No models supporting 'generateContent' were found for this API key.")
     
-    print("✅ Step 1 complete: Text extracted successfully.")
-
-    # --- Step 2: Test the Analyzer ---
-    print("\n🧠 Step 2: Analyzing extracted text with Gemini...")
-    analysis_result = analyze_resume_text(extracted_text)
-
-    if not analysis_result:
-        print("🛑 TEST FAILED: Analysis returned nothing.")
-        return
-        
-    print("✅ Step 2 complete: Analysis successful.")
-
-    # --- Step 3: Display the Final Result ---
-    print("\n--- ✅ Test Passed! Final JSON Output ---")
-    # Print the dictionary as a nicely formatted JSON string
-    print(json.dumps(analysis_result, indent=4))
-    print("-----------------------------------------")
-
+    print("---------------------------------------------")
 
 if __name__ == "__main__":
-    main()
+    check_available_models()
