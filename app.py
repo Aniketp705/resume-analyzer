@@ -13,7 +13,7 @@ ALLOWED_EXTENSIONS = {'pdf'}
 
 # --- Flask App Setup ---
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER 
 CORS(app)
 
 # --- Helper Function ---
@@ -27,10 +27,9 @@ def index():
     """Renders the main upload page."""
     return render_template('index.html')
 
-# --- API Endpoint (no changes needed here) ---
+# --- API Endpoint ---
 @app.route('/analyze', methods=['POST'])
 def analyze_resume():
-    """API endpoint to upload a resume, analyze it, and return data."""
     if 'resume' not in request.files:
         return jsonify({"error": "No resume file part in the request"}), 400
     
