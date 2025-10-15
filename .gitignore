@@ -10,3 +10,9 @@ __pycache__/
 
 # Uploaded resume files
 uploaded_resumes/
+
+# Check models file
+check_models.py
+
+# Test file
+test.py

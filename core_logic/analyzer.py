@@ -17,7 +17,7 @@ def analyze_resume_text(resume_text: str) -> dict | None:
     # --- 2. Call the Gemini API ---
     try:
         generation_config = genai.GenerationConfig(response_mime_type="application/json") # type: ignore
-        model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config) # type: ignore
+        model = genai.GenerativeModel('gemini-2.0-flash', generation_config=generation_config) # type: ignore
         
         # 🎯 THE NEW, DETAILED PROMPT FOR OPTIMAL EXTRACTION
         prompt = f"""
