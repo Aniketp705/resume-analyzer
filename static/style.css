@@ -1,8 +1,9 @@
 /* static/style.css */
 
+/* --- Import a modern font --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* --- Animated Gradient Background (Idle Animation) --- */
+/* --- Idle Background Animation --- */
 @keyframes gradient-animation {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -11,99 +12,160 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    /* The background is now a large, slow-moving gradient */
+    color: #e2e8f0;
+    margin: 0;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
     background: linear-gradient(-45deg, #1a202c, #2d3748, #4a5568, #2d3748);
     background-size: 400% 400%;
     animation: gradient-animation 15s ease infinite;
 }
 
-/* --- Main App Container with Glassmorphism Effect --- */
-.main-container {
+/* --- Main Container with Glassmorphism Effect --- */
+.container {
     background-color: rgba(26, 32, 44, 0.8);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
 }
 
-/* Hide Streamlit's default elements for a cleaner look */
-header, footer { visibility: hidden; }
+h1 {
+    font-size: 2.2rem;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
 
-/* --- Fade-in Animation for Elements --- */
+p {
+    color: #a0aec0;
+    margin-bottom: 2rem;
+}
+
+#upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.file-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 2px dashed #4a5568;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.file-input-wrapper:hover {
+    border-color: #6366f1;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+#resume-file {
+    display: none;
+}
+
+.btn-file-dummy {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-file-dummy:hover {
+    background-color: #4a5568;
+}
+
+#file-name-display {
+    margin-left: 1rem;
+    color: #a0aec0;
+    font-style: italic;
+}
+
+.btn-submit {
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+}
+
+.loader {
+    border: 5px solid #2d3748;
+    border-top: 5px solid #6366f1;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.results-box, .error-box {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: left;
+    animation: fadeIn 0.5s ease-out;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-h1, .stMarkdown {
-    animation: fadeIn 0.8s ease-out forwards;
+.results-box {
+    background-color: #1a202c;
+    border: 1px solid #2d3748;
 }
 
-/* --- Styled, Hoverable Button --- */
-div[data-testid="stButton"] > button {
-    background: linear-gradient(45deg, #6366f1, #8b5cf6);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    width: 100%;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-div[data-testid="stButton"] > button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+.error-box {
+    background-color: rgba(229, 62, 62, 0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(229, 62, 62, 0.5);
 }
 
-/* --- Results Display: The Profile Card --- */
-.results-container {
-    animation: fadeIn 1s ease-out 0.5s forwards;
-    opacity: 0; /* Start hidden for animation */
-    margin-top: 2rem;
-}
-.candidate-header h2 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 0.2rem;
-    color: #ffffff;
-}
-.candidate-header p {
-    font-size: 1rem;
-    color: #a0aec0;
+/* Styling for Prism.js code block */
+pre[class*="language-"] {
+    background: #272822 !important; /* Okaidia theme's background */
+    border: none !important;
     margin: 0;
-}
-.summary-text {
-    color: #cbd5e0;
-    font-size: 1.05rem;
-    margin-top: 1.5rem;
-}
-
-/* --- Skill Tags with Hover Animation --- */
-.skills-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1rem;
-}
-.skill-tag {
-    background-color: #2d3748;
-    color: #e2e8f0;
-    padding: 0.4rem 1rem;
-    border-radius: 16px;
     font-size: 0.9rem;
-    font-weight: 500;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-}
-.skill-tag:hover {
-    transform: scale(1.08);
-    background-color: #4a5568;
-}
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translateZ(0);
 
-/* --- Work/Education History Items --- */
-.history-item {
-    padding: 1.5rem 0;
-    border-bottom: 1px solid #2d3748;
+    /* --- ADD THESE LINES TO FIX THE OVERFLOW --- */
+    white-space: pre-wrap;   /* Allows the text to wrap */
+    word-wrap: break-word;   /* Breaks long words if necessary */
+    /* --- END OF FIX --- */
 }
-.history-item:last-child { border-bottom: none; }
-.job-title { font-size: 1.2rem; font-weight: 600; color: #ffffff; margin: 0; }
-.company-info { font-size: 1rem; color: #a0aec0; margin: 0.2rem 0 0.8rem 0; }
-.responsibilities ul { margin: 0; padding-left: 1.2rem; color: #cbd5e0; }
+.hidden {
+    display: none;
+}
