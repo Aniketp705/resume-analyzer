@@ -43,6 +43,17 @@ h1 {
     margin-bottom: 0.5rem;
 }
 
+/* --- NEW: Styling for H2 subheaders --- */
+h2 {
+    font-size: 1.5rem;
+    color: #ffffff;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #4a5568;
+    padding-bottom: 0.5rem;
+}
+
 p {
     color: #a0aec0;
     margin-bottom: 2rem;
@@ -54,6 +65,7 @@ p {
     gap: 1.5rem;
 }
 
+/* --- Styling for File Input --- */
 .file-input-wrapper {
     position: relative;
     display: flex;
@@ -70,7 +82,7 @@ p {
 }
 
 #resume-file {
-    display: none;
+    display: none; /* Hide the default input */
 }
 
 .btn-file-dummy {
@@ -82,6 +94,7 @@ p {
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.3s;
+    white-space: nowrap; /* Prevent button text wrapping */
 }
 
 .btn-file-dummy:hover {
@@ -92,8 +105,45 @@ p {
     margin-left: 1rem;
     color: #a0aec0;
     font-style: italic;
+    overflow: hidden; /* Prevent long filenames from breaking layout */
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+/* --- Styling for Text Input --- */
+.text-input-wrapper {
+    display: flex;
+    flex-direction: column; /* Label above input */
+    align-items: flex-start; /* Align label to the left */
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.text-input-wrapper label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #a0aec0;
+}
+
+.text-input-wrapper input[type="text"] {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    background-color: #2d3748;
+    color: #e2e8f0;
+    font-size: 1rem;
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.text-input-wrapper input[type="text"]:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* --- Styling for Submit Button --- */
 .btn-submit {
     background: linear-gradient(45deg, #6366f1, #8b5cf6);
     color: white;
@@ -111,6 +161,18 @@ p {
     box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
 }
 
+/* --- NEW: Specific styling for the second button --- */
+#btn-get-suggestions {
+    /* Make the suggestion button a different color to stand out */
+    background: linear-gradient(45deg, #10B981, #34D399);
+}
+
+#btn-get-suggestions:hover {
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+}
+
+
+/* --- Styling for Loader --- */
 .loader {
     border: 5px solid #2d3748;
     border-top: 5px solid #6366f1;
@@ -126,6 +188,7 @@ p {
     100% { transform: rotate(360deg); }
 }
 
+/* --- Styling for Results & Error Boxes --- */
 .results-box, .error-box {
     margin-top: 2rem;
     padding: 1.5rem;
@@ -160,12 +223,18 @@ pre[class*="language-"] {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transform: translateZ(0);
-
-    /* --- ADD THESE LINES TO FIX THE OVERFLOW --- */
     white-space: pre-wrap;   /* Allows the text to wrap */
     word-wrap: break-word;   /* Breaks long words if necessary */
-    /* --- END OF FIX --- */
 }
+
 .hidden {
     display: none;
+}
+
+/* --- NEW: Styling for the improver section divider --- */
+#improver-section {
+    margin-top: 2rem;
+    border-top: 2px solid #4a5568;
+    padding-top: 2rem;
+    animation: fadeIn 0.5s ease-out; /* Add fade-in for when it appears */
 }

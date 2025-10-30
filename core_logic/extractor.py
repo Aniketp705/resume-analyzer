@@ -6,7 +6,7 @@ def extract_text_from_pdf(pdf_path: str) -> str | None:
         doc = fitz.open(pdf_path)
         
         # Join the text from all pages into a single string
-        text = "".join(page.get_text() for page in doc)
+        text = "".join(page.get_text() for page in doc)  # type: ignore
         
         return text
     except Exception as e:

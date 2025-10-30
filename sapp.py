@@ -47,6 +47,7 @@ page_style = """
         to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Apply animation to h1 and markdown */
     h1, .stMarkdown {
         animation: fadeIn 0.8s ease-out forwards;
     }
@@ -95,9 +96,18 @@ page_style = """
     .job-title { font-size: 1.2rem; font-weight: 600; color: #ffffff; margin: 0; }
     .company-info { font-size: 1rem; color: #a0aec0; margin: 0.2rem 0 0.8rem 0; }
     .responsibilities ul { margin: 0; padding-left: 1.2rem; color: #cbd5e0; }
+
+    /* --- Custom Styling for the File Uploader --- */
+    div[data-testid="stFileUploader"] {
+        border: 2px dashed #4a5568;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 1.5rem;
+        border-radius: 12px;
+    }
 """
 
 # Inject the CSS into the app
+# This must be the first Streamlit command after set_page_config
 st.markdown(f'<style>{page_style}</style>', unsafe_allow_html=True)
 
 # Wrap the main content in a div for the glassmorphism effect
@@ -166,9 +176,13 @@ if uploaded_file is not None:
                                     <p class="company-info">{edu.get('institution', 'N/A')} ({edu.get('graduation_year', 'N/A')})</p>
                                 </div>
                             """, unsafe_allow_html=True)
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True) # Closes results-container
 
                 else:
                     st.error(f"API Error: {response.json().get('error', 'An unknown error occurred.')}")
             except requests.exceptions.RequestException:
                 st.error("Connection Error: Could not connect to the backend.")
+
+# Close the main container div at the very end
+st.markdown('</div>', unsafe_allow_html=True)
+

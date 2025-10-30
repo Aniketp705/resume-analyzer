@@ -1,0 +1,66 @@
+import os
+import json
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+def get_resume_feedback(extracted_data: dict, target_job_profile: str) -> dict | None:
+    """
+    Uses the POWERFUL 'gemini-pro-latest' model for deep analysis and feedback.
+    Takes existing extracted data and a target job as input.
+    """
+    try:
+        load_dotenv()
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not found or is empty in your .env file.")
+        genai.configure(api_key=api_key) # type: ignore
+    except Exception as e:
+        print(f"🛑 CONFIGURATION ERROR: {e}")
+        return None
+
+    generation_config = genai.GenerationConfig(response_mime_type="application/json")
+    model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config)
+    
+    # Convert the extracted data back to a string to feed to the Pro model
+    resume_json_string = json.dumps(extracted_data, indent=2)
+
+    prompt = f"""
+    You are an expert career coach. Analyze the candidate's extracted resume data, provided as a JSON object,
+    in the context of the target job profile: '{target_job_profile}'.
+
+    Return a concise, actionable JSON object with the following exact structure:
+    {{
+      "resume_score": <An integer score from 0-100>,
+      "main_feedback": "<A single, concise sentence summarizing the most important area for improvement.>",
+      "strengths": ["<A list of 2-3 key strengths of the resume.>"],
+      "top_3_improvements": [
+        {{
+          "area": "Professional Summary",
+          "suggestion": "<A brief, actionable suggestion for the summary.>",
+          "example_rewrite": "<A rewritten, impactful professional summary tailored for the role.>"
+        }},
+        {{
+          "area": "Action Verbs / Keywords",
+          "suggestion": "<Explain why stronger verbs are needed.>",
+          "examples": {{"weak_verbs": ["<List of 2-3 weak verbs>"], "stronger_verbs": ["<List of 2-3 better alternatives>"]}}
+        }},
+        {{
+          "area": "Missing Keywords",
+          "suggestion": "<Explain why adding specific keywords is important for ATS.>",
+          "keywords_to_add": ["<A short list of 3-5 of the MOST CRITICAL missing keywords>"]
+        }}
+      ]
+    }}
+
+    Candidate's Extracted Resume Data:
+    ---
+    {resume_json_string}
+    ---
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"🛑 An unexpected error occurred during the feedback API call: {e}")
+        return None
