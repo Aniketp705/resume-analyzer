@@ -43,7 +43,7 @@ h1 {
     margin-bottom: 0.5rem;
 }
 
-/* --- NEW: Styling for H2 subheaders --- */
+/* --- Styling for H2 subheaders --- */
 h2 {
     font-size: 1.5rem;
     color: #ffffff;
@@ -143,7 +143,7 @@ p {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
 }
 
-/* --- Styling for Submit Button --- */
+/* --- Styling for Submit Buttons --- */
 .btn-submit {
     background: linear-gradient(45deg, #6366f1, #8b5cf6);
     color: white;
@@ -154,6 +154,7 @@ p {
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    flex: 1; /* Makes buttons in a flex container share space */
 }
 
 .btn-submit:hover {
@@ -161,14 +162,31 @@ p {
     box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
 }
 
-/* --- NEW: Specific styling for the second button --- */
+/* --- NEW: Styling for the 2-button container --- */
+.improver-buttons {
+    display: flex;
+    flex-direction: row; /* Align buttons side-by-side */
+    gap: 1.5rem;      /* Add space between the buttons */
+    width: 100%;
+}
+
+/* Specific styling for the suggestion button */
 #btn-get-suggestions {
-    /* Make the suggestion button a different color to stand out */
     background: linear-gradient(45deg, #10B981, #34D399);
 }
 
 #btn-get-suggestions:hover {
     box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* --- NEW: Specific styling for the roadmap button --- */
+#btn-get-roadmap {
+    /* Give the roadmap button a different, distinct color */
+    background: linear-gradient(45deg, #F59E0B, #FBBF24);
+}
+
+#btn-get-roadmap:hover {
+    box-shadow: 0 10px 20px rgba(245, 158, 11, 0.4);
 }
 
 
@@ -231,7 +249,7 @@ pre[class*="language-"] {
     display: none;
 }
 
-/* --- NEW: Styling for the improver section divider --- */
+/* --- Styling for the improver section divider --- */
 #improver-section {
     margin-top: 2rem;
     border-top: 2px solid #4a5568;

@@ -64,3 +64,45 @@ def get_resume_feedback(extracted_data: dict, target_job_profile: str) -> dict |
     except Exception as e:
         print(f"🛑 An unexpected error occurred during the feedback API call: {e}")
         return None
+
+
+# In core_logic/improver.py
+
+def get_career_roadmap(extracted_data: dict, target_job_profile: str) -> list | None:
+    """
+    Uses Gemini Pro to generate a JSON-based career roadmap.
+    """
+    # ... (your standard API key setup logic) ...
+    
+    generation_config = genai.GenerationConfig(response_mime_type="application/json")
+    model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config)
+    
+    # We pass the user's skills so the AI knows what is "completed"
+    current_skills = extracted_data.get('skills', [])
+
+    prompt = f"""
+    You are an expert career coach. Analyze the user's current skills and their target job role.
+    Your task is to generate a step-by-step career roadmap as a JSON array.
+
+    The user's target job is: '{target_job_profile}'
+    The user's current skills are: {current_skills}
+
+    The JSON array must be a list of "phase" objects. Each object must have:
+    1.  `phase`: An integer (1, 2, 3...).
+    2.  `title`: A short title for the phase (e.g., "Core ML Engineering").
+    3.  `summary`: A one-sentence summary of this phase.
+    4.  `steps`: An array of objects, each with:
+        * `name`: The name of the skill or topic (e.g., "Docker").
+        * `status`: A string. It MUST be "completed" if the skill is in the user's current skill list. It MUST be "in_progress" or "to_learn" if it's not.
+
+    Carefully compare the user's current skills with the skills needed for the target job to decide the status for each step.
+    Create 3-5 logical phases, starting from their current skills and ending at their target job.
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        # The response.text will be a string, which we parse into a Python list
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"🛑 An unexpected error occurred during roadmap generation: {e}")
+        return None

@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from core_logic.extractor import extract_text_from_pdf
 # 1. Import BOTH analyzer functions
 from core_logic.analyzer import extract_resume_data
-from core_logic.improver import get_resume_feedback
+from core_logic.improver import get_resume_feedback, get_career_roadmap
 
 # --- Configuration ---
 UPLOAD_FOLDER = 'uploaded_resumes'
@@ -87,6 +87,23 @@ def suggest_improvements():
         return jsonify(feedback_result), 200
     else:
         return jsonify({"error": "Failed to get improvement suggestions"}), 500
+    
+@app.route('/generate-roadmap', methods=['POST'])
+def generate_roadmap_endpoint():
+    data = request.get_json()
+    if not data or 'extracted_data' not in data or 'target_job' not in data:
+        return jsonify({"error": "Missing 'extracted_data' or 'target_job' in JSON body"}), 400
+    
+    extracted_data = data.get('extracted_data')
+    target_job = data.get('target_job')
+
+    # Call a new function from your "improver" module
+    roadmap_json = get_career_roadmap(extracted_data, target_job)
+    
+    if roadmap_json:
+        return jsonify(roadmap_json), 200
+    else:
+        return jsonify({"error": "Failed to generate career roadmap"}), 500
 
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):

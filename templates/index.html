@@ -6,6 +6,72 @@
     <title>Resume Analyzer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <!-- --- NEW: Internal CSS for Roadmap --- -->
+    <style>
+        /* Container for the two action buttons */
+        .improver-buttons {
+            display: flex;
+            gap: 1.5rem;
+            width: 100%;
+        }
+        .improver-buttons > button {
+            flex: 1; /* Make buttons share space equally */
+        }
+
+        /* --- Styling for the Roadmap --- */
+        .roadmap-phase {
+            background-color: rgba(26, 32, 44, 0.7); /* Darker card */
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.5s ease-out; /* Re-use existing fadeIn */
+        }
+        .roadmap-phase h3 { /* Phase Title */
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-top: 0;
+        }
+        .roadmap-phase p { /* Phase Summary */
+            font-size: 1rem;
+            color: #a0aec0;
+            margin-bottom: 1.5rem;
+        }
+        .roadmap-steps-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .step-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 1rem;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid;
+        }
+        /* Color-coding based on status */
+        .status-completed {
+            background-color: rgba(56, 161, 105, 0.1);
+            color: #68d391;
+            border-color: #38a169;
+        }
+        .status-in-progress {
+            background-color: rgba(221, 107, 32, 0.1);
+            color: #f6ad55;
+            border-color: #dd6b20;
+        }
+        .status-to-learn {
+            background-color: #2d3748;
+            color: #a0aec0;
+            border-color: #4a5568;
+        }
+    </style>
+    <!-- --- END: Internal CSS --- -->
 </head>
 <body>
 
@@ -32,22 +98,36 @@
             <pre><code id="json-output-extract" class="language-json"></code></pre>
         </div>
 
-        <!-- --- STEP 2: IMPROVER SECTION (Starts hidden) --- -->
+        <!-- --- STEP 2 & 3: IMPROVER SECTION (Starts hidden) --- -->
         <div id="improver-section" class="hidden" style="margin-top: 2rem; border-top: 2px solid #4a5568; padding-top: 2rem;">
-            <h2>Step 2: Get Improvement Suggestions</h2>
+            <h2>Step 2: Get AI Feedback & Roadmap</h2>
             <div class="text-input-wrapper" style="margin-bottom: 1.5rem;">
                 <label for="target-job">Target Job Profile:</label>
                 <input type="text" id="target-job" name="target_job" placeholder="e.g., Machine Learning Engineer" required>
             </div>
-            <button id="btn-get-suggestions" class="btn-submit">Step 2: Get Feedback (Pro)</button>
             
+            <!-- NEW: Button container -->
+            <div class="improver-buttons">
+                <button id="btn-get-suggestions" class="btn-submit">Get Feedback (Pro)</button>
+                <button id="btn-get-roadmap" class="btn-submit">Generate Roadmap (Pro)</button>
+            </div>
+            
+            <!-- Loaders and Errors for Step 2 -->
             <div id="loader-suggest" class="loader hidden"></div>
             <div id="error-display-suggest" class="error-box hidden"></div>
+            <div id="loader-roadmap" class="loader hidden"></div>
+            <div id="error-display-roadmap" class="error-box hidden"></div>
 
-            <!-- --- RESULTS FOR STEP 2 --- -->
+            <!-- --- RESULTS FOR STEP 2 (Suggestions) --- -->
             <div id="results-suggest" class="results-box hidden">
                 <h2>Improvement Suggestions (from Pro)</h2>
                 <pre><code id="json-output-suggest" class="language-json"></code></pre>
+            </div>
+
+            <!-- --- NEW: RESULTS FOR STEP 3 (Roadmap) --- -->
+            <div id="results-roadmap" class="hidden" style="margin-top: 2rem;">
+                <h2>Your Personalized Career Roadmap</h2>
+                <!-- The visual roadmap will be built here by JavaScript -->
             </div>
         </div>
     </div>
@@ -69,20 +149,25 @@
 
         const improverSection = document.getElementById('improver-section');
         const targetJobInput = document.getElementById('target-job');
-        const btnGetSuggestions = document.getElementById('btn-get-suggestions');
         
+        // Suggestion elements
+        const btnGetSuggestions = document.getElementById('btn-get-suggestions');
         const loaderSuggest = document.getElementById('loader-suggest');
         const errorSuggest = document.getElementById('error-display-suggest');
         const resultsSuggest = document.getElementById('results-suggest');
         const jsonOutputSuggest = document.getElementById('json-output-suggest');
 
+        // NEW: Roadmap elements
+        const btnGetRoadmap = document.getElementById('btn-get-roadmap');
+        const loaderRoadmap = document.getElementById('loader-roadmap');
+        const errorRoadmap = document.getElementById('error-display-roadmap');
+        const resultsRoadmap = document.getElementById('results-roadmap');
+
         // --- Store extracted data globally ---
         let extractedDataCache = null;
 
-        // --- Event listener for dummy file button ---
+        // --- Event listeners for file input ---
         fileDummyBtn.addEventListener('click', () => resumeFile.click());
-
-        // --- Event listener to show selected file name ---
         resumeFile.addEventListener('change', () => {
             fileNameDisplay.textContent = resumeFile.files.length > 0 ? resumeFile.files[0].name : 'No file selected';
         });
@@ -90,34 +175,30 @@
         // --- Event listener for STEP 1: Form submission (Fast Extraction) ---
         uploadForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            // Hide all results from previous runs
             resultsExtract.classList.add('hidden');
             errorExtract.classList.add('hidden');
-            improverSection.classList.add('hidden'); // Hide step 2 on new upload
-            resultsSuggest.classList.add('hidden'); // Hide old suggestions
+            improverSection.classList.add('hidden');
+            resultsSuggest.classList.add('hidden');
+            resultsRoadmap.classList.add('hidden'); // NEW
+            errorSuggest.classList.add('hidden');
+            errorRoadmap.classList.add('hidden'); // NEW
+            
             loaderExtract.classList.remove('hidden');
 
             const formData = new FormData();
             formData.append('resume', resumeFile.files[0]);
 
             try {
-                const response = await fetch('/analyze', {
-                    method: 'POST',
-                    body: formData,
-                });
-
+                const response = await fetch('/analyze', { method: 'POST', body: formData });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'An unknown error occurred.');
 
-                // Save data to cache
-                extractedDataCache = data;
-
-                // Display extracted data
+                extractedDataCache = data; // Save data to cache
                 jsonOutputExtract.textContent = JSON.stringify(data, null, 2);
                 Prism.highlightElement(jsonOutputExtract);
                 resultsExtract.classList.remove('hidden');
-                
-                // Show the next step
-                improverSection.classList.remove('hidden');
+                improverSection.classList.remove('hidden'); // Show the next step
 
             } catch (error) {
                 errorExtract.textContent = `Error: ${error.message}`;
@@ -127,26 +208,50 @@
             }
         });
 
+        // --- Helper function to build the Roadmap UI ---
+        function displayRoadmap(data) {
+            const statusMap = {
+                "completed": "✔",
+                "in_progress": "⚙️",
+                "to_learn": "📚"
+            };
+            let html = "";
+            data.forEach(phase => {
+                html += `
+                <div class="roadmap-phase">
+                    <h3>Phase ${phase.phase}: ${phase.title}</h3>
+                    <p>${phase.summary}</p>
+                    <div class="roadmap-steps-container">
+                        ${phase.steps.map(step => `
+                            <span class="step-tag status-${step.status.replace('_', '-')}">
+                                ${statusMap[step.status] || '❓'} ${step.name}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            });
+            resultsRoadmap.innerHTML = html; // Set the generated HTML
+            resultsRoadmap.classList.remove('hidden');
+        }
+
         // --- Event listener for STEP 2: Get Suggestions (Pro Analysis) ---
         btnGetSuggestions.addEventListener('click', async () => {
             const targetJob = targetJobInput.value;
-            
-            if (!targetJob || !targetJob.trim()) {
-                errorSuggest.textContent = "Please enter a target job profile.";
-                errorSuggest.classList.remove('hidden');
-                return;
-            }
-            if (!extractedDataCache) {
-                errorSuggest.textContent = "Please analyze a resume first.";
+            if (!targetJob || !targetJob.trim() || !extractedDataCache) {
+                errorSuggest.textContent = "Please analyze a resume and enter a target job first.";
                 errorSuggest.classList.remove('hidden');
                 return;
             }
 
+            // Hide other results
             resultsSuggest.classList.add('hidden');
             errorSuggest.classList.add('hidden');
+            resultsRoadmap.classList.add('hidden');
+            errorRoadmap.classList.add('hidden');
+            
             loaderSuggest.classList.remove('hidden');
 
-            // --- This is the payload structure you tested in Postman ---
             const payload = {
                 extracted_data: extractedDataCache,
                 target_job: targetJob
@@ -155,25 +260,62 @@
             try {
                 const response = await fetch('/suggest-improvements', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json' // Send as JSON
-                    },
-                    body: JSON.stringify(payload) // Stringify the JSON payload
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'An unknown error occurred.');
 
-                // Display suggestions
                 jsonOutputSuggest.textContent = JSON.stringify(data, null, 2);
                 Prism.highlightElement(jsonOutputSuggest);
                 resultsSuggest.classList.remove('hidden');
-
             } catch (error) {
                 errorSuggest.textContent = `Error: ${error.message}`;
                 errorSuggest.classList.remove('hidden');
             } finally {
                 loaderSuggest.classList.add('hidden');
+            }
+        });
+
+        // --- NEW: Event listener for STEP 3: Get Roadmap (Pro Analysis) ---
+        btnGetRoadmap.addEventListener('click', async () => {
+            const targetJob = targetJobInput.value;
+            if (!targetJob || !targetJob.trim() || !extractedDataCache) {
+                errorRoadmap.textContent = "Please analyze a resume and enter a target job first.";
+                errorRoadmap.classList.remove('hidden');
+                return;
+            }
+
+            // Hide other results
+            resultsSuggest.classList.add('hidden');
+            errorSuggest.classList.add('hidden');
+            resultsRoadmap.classList.add('hidden');
+            errorRoadmap.classList.add('hidden');
+            
+            loaderRoadmap.classList.remove('hidden');
+
+            const payload = {
+                extracted_data: extractedDataCache,
+                target_job: targetJob
+            };
+
+            try {
+                const response = await fetch('/generate-roadmap', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'An unknown error occurred.');
+
+                // Call the new UI builder function
+                displayRoadmap(data); 
+
+            } catch (error) {
+                errorRoadmap.textContent = `Error: ${error.message}`;
+                errorRoadmap.classList.remove('hidden');
+            } finally {
+                loaderRoadmap.classList.add('hidden');
             }
         });
     </script>
