@@ -72,12 +72,22 @@ def get_career_roadmap(extracted_data: dict, target_job_profile: str) -> list | 
     """
     Uses Gemini Pro to generate a JSON-based career roadmap.
     """
-    # ... (your standard API key setup logic) ...
+    
+    # --- ADD THIS BLOCK TO FIX THE BUG ---
+    try:
+        load_dotenv()
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not found or is empty in your .env file.")
+        genai.configure(api_key=api_key) # type: ignore
+    except Exception as e:
+        print(f"🛑 CONFIGURATION ERROR: {e}")
+        return None
+    # --- END OF FIX ---
     
     generation_config = genai.GenerationConfig(response_mime_type="application/json")
     model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config)
     
-    # We pass the user's skills so the AI knows what is "completed"
     current_skills = extracted_data.get('skills', [])
 
     prompt = f"""
@@ -101,7 +111,6 @@ def get_career_roadmap(extracted_data: dict, target_job_profile: str) -> list | 
     
     try:
         response = model.generate_content(prompt)
-        # The response.text will be a string, which we parse into a Python list
         return json.loads(response.text)
     except Exception as e:
         print(f"🛑 An unexpected error occurred during roadmap generation: {e}")
