@@ -1,105 +1,107 @@
-# Resume Analyzer
+# Resume Analyzer, Improver & Roadmap Generator
 
-A Flask-based web application that analyzes resumes using Google's Gemini Pro AI model to extract and analyze key information from PDF resumes.
+![Project Banner](static/project_banner.png)
+
+A powerful AI-powered application that analyzes resumes, provides detailed improvement feedback, and generates personalized career roadmaps. It uses Google's Gemini Pro model for deep analysis and features a modern, interactive Streamlit user interface backed by a robust Flask API.
 
 ## Features
 
-- PDF resume upload functionality
-- Automatic text extraction from PDF files
-- AI-powered resume analysis using Google's Gemini Pro
-- Clean and simple web interface
-- Cross-origin resource sharing (CORS) enabled
+- **📄 PDF Resume Analysis**: Instantly extract and analyze key information from PDF resumes.
+- **🚀 AI-Powered Feedback**: Get detailed, actionable suggestions to improve your resume score for specific job roles.
+- **🗺️ Career Roadmap**: Generate a personalized step-by-step career roadmap to reach your target job.
+- **✨ Interactive UI**: A beautiful, responsive Streamlit interface with real-time updates.
+- **🔌 Robust API**: A Flask backend handling PDF extraction and AI processing.
+
+## Architecture
+
+The project consists of two main components:
+1.  **Backend (Flask)**: Handles file uploads, PDF text extraction, and communication with the Google Gemini API.
+2.  **Frontend (Streamlit)**: Provides a user-friendly interface for uploading resumes, viewing results, and interacting with the AI features.
 
 ## Prerequisites
 
 - Python 3.x
-- Flask
-- PyMuPDF (fitz)
 - Google Generative AI API key
-- Other dependencies listed in `requirements.txt`
 
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/Aniketp705/resume-analyzer.git
-cd resume-analyzer
-```
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/Aniketp705/resume-analyzer.git
+    cd resume-analyzer
+    ```
 
-2. Create and activate a virtual environment (recommended):
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows, use: venv\Scripts\activate
-```
+2.  Create and activate a virtual environment (recommended):
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+    ```
 
-3. Install the required dependencies:
-```bash
-pip install -r requirements.txt
-```
+3.  Install the required dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-4. Set up environment variables:
-   - Create a `.env` file in the project root
-   - Add your Google API key:
-     ```
-     GOOGLE_API_KEY=your_api_key_here
-     ```
+4.  Set up environment variables:
+    - Create a `.env` file in the project root
+    - Add your Google API key:
+      ```
+      GOOGLE_API_KEY=your_api_key_here
+      ```
+
+## Usage
+
+To run the application, you need to start both the Flask backend and the Streamlit frontend.
+
+1.  **Start the Backend Server**:
+    Open a terminal and run:
+    ```bash
+    python app.py
+    ```
+    The server will start at `http://localhost:5001`.
+
+2.  **Start the Frontend Application**:
+    Open a new terminal window (keep the backend running) and run:
+    ```bash
+    streamlit run sapp.py
+    ```
+    The application will open in your default web browser (usually at `http://localhost:8501`).
 
 ## Project Structure
 
 ```
 resume-analyzer/
-├── app.py                 # Main Flask application
+├── app.py                 # Flask Backend API
+├── sapp.py                # Streamlit Frontend Application
 ├── core_logic/
-│   ├── analyzer.py       # Resume analysis logic using Gemini Pro
-│   └── extractor.py      # PDF text extraction functionality
-├── static/
-│   └── style.css         # CSS styles for the web interface
-├── templates/
-│   └── index.html        # HTML template for the upload page
-└── uploaded_resumes/     # Directory for temporary resume storage
+│   ├── analyzer.py        # Resume analysis logic
+│   ├── extractor.py       # PDF text extraction
+│   └── improver.py        # Feedback and roadmap generation logic
+├── static/                # Static assets
+├── templates/             # Flask templates (optional)
+├── uploaded_resumes/      # Temporary storage for uploads
+├── requirements.txt       # Project dependencies
+└── readme.md              # Project documentation
 ```
-
-## Usage
-
-1. Start the Flask server:
-```bash
-python app.py
-```
-
-2. Open a web browser and navigate to `http://localhost:5001`
-
-3. Upload a PDF resume and click "Analyze" to get the AI-powered analysis
 
 ## API Endpoints
 
-- `GET /`: Serves the main upload page
-- `POST /analyze`: Accepts PDF resume uploads and returns analysis results
-  - Request: multipart/form-data with 'resume' file field
-  - Response: JSON containing analyzed resume data
+The Flask backend exposes the following endpoints:
 
-## Error Handling
-
-The application includes comprehensive error handling for:
-- Invalid file types
-- Missing files
-- PDF extraction errors
-- API configuration issues
-- Analysis failures
-
-## Security Features
-
-- Secure filename handling
-- File type validation
-- Controlled upload directory
-- CORS protection
+-   `POST /analyze`: Upload and analyze a resume PDF.
+    -   **Body**: `multipart/form-data` with `resume` file.
+-   `POST /suggest-improvements`: Get improvement suggestions for a specific job role.
+    -   **Body**: JSON `{ "extracted_data": {...}, "target_job": "..." }`
+-   `POST /generate-roadmap`: Generate a career roadmap.
+    -   **Body**: JSON `{ "extracted_data": {...}, "target_job": "..." }`
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
+1.  Fork the repository
+2.  Create your feature branch
+3.  Commit your changes
+4.  Push to the branch
+5.  Create a new Pull Request
 
 ## License
 
