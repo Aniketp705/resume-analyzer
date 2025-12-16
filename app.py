@@ -23,13 +23,13 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# --- Route to serve the HTML page (Optional for Postman testing) ---
+# --- Route to serve the HTML page ---
 @app.route('/')
 def index():
     """Renders the main upload page."""
     return render_template('index.html')
 
-# --- API Endpoint 1: FAST EXTRACTION (Flash) ---
+# --- API Endpoint 1: FAST EXTRACTION ---
 @app.route('/analyze', methods=['POST'])
 def analyze_resume():
     # This endpoint only needs the resume file
@@ -65,7 +65,7 @@ def analyze_resume():
     else:
         return jsonify({"error": "Invalid file type, only PDFs are allowed"}), 400
 
-# --- API Endpoint 2: DEEP FEEDBACK (Pro) ---
+# --- API Endpoint 2: DEEP FEEDBACK ---
 @app.route('/suggest-improvements', methods=['POST'])
 def suggest_improvements():
     # This endpoint expects JSON data, not form data
