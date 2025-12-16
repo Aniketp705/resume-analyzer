@@ -12,6 +12,8 @@ A powerful AI-powered application that analyzes resumes, provides detailed impro
 - **✨ Interactive UI**: A beautiful, responsive Streamlit interface with real-time updates.
 - **🔌 Robust API**: A Flask backend handling PDF extraction and AI processing.
 
+![Feature](static/roadmap.png)
+
 ## Architecture
 
 The project consists of two main components:

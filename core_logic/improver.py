@@ -1,27 +1,31 @@
 import os
 import json
+import time
 import google.generativeai as genai
 from dotenv import load_dotenv
 
 def get_resume_feedback(extracted_data: dict, target_job_profile: str) -> dict | None:
     """
-    Uses the POWERFUL 'gemini-pro-latest' model for deep analysis and feedback.
-    Takes existing extracted data and a target job as input.
+    Uses 'gemini-1.5-flash' for deep analysis.
+    Includes retry logic and forced env reloading.
     """
     try:
-        load_dotenv()
+        # override=True ensures we read the NEW key if you changed the .env file
+        load_dotenv(override=True) 
         api_key = os.environ.get("GOOGLE_API_KEY")
+        
         if not api_key:
-            raise ValueError("GOOGLE_API_KEY not found or is empty in your .env file.")
-        genai.configure(api_key=api_key) # type: ignore
+            print("🛑 ERROR: GOOGLE_API_KEY not found.")
+            return None
+            
+        genai.configure(api_key=api_key)
     except Exception as e:
         print(f"🛑 CONFIGURATION ERROR: {e}")
         return None
 
     generation_config = genai.GenerationConfig(response_mime_type="application/json")
-    model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config)
+    model = genai.GenerativeModel('gemini-2.5-flash', generation_config=generation_config)
     
-    # Convert the extracted data back to a string to feed to the Pro model
     resume_json_string = json.dumps(extracted_data, indent=2)
 
     prompt = f"""
@@ -58,35 +62,44 @@ def get_resume_feedback(extracted_data: dict, target_job_profile: str) -> dict |
     ---
     """
     
-    try:
-        response = model.generate_content(prompt)
-        return json.loads(response.text)
-    except Exception as e:
-        print(f"🛑 An unexpected error occurred during the feedback API call: {e}")
-        return None
+    # Retry logic for handling 429 errors
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = model.generate_content(prompt)
+            return json.loads(response.text)
+        except Exception as e:
+            if "429" in str(e):
+                print(f"⚠️ Quota exceeded. Retrying in {2 * (attempt + 1)} seconds... (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(2 * (attempt + 1)) # Exponential backoff: 2s, 4s, 6s
+            else:
+                print(f"🛑 An unexpected error occurred during feedback generation: {e}")
+                return None
+    
+    print("🛑 Failed to get feedback after multiple retries.")
+    return None
 
-
-# In core_logic/improver.py
 
 def get_career_roadmap(extracted_data: dict, target_job_profile: str) -> list | None:
     """
-    Uses Gemini Pro to generate a JSON-based career roadmap.
+    Uses Gemini Flash to generate a JSON-based career roadmap.
+    Includes retry logic and forced env reloading.
     """
-    
-    # --- ADD THIS BLOCK TO FIX THE BUG ---
     try:
-        load_dotenv()
+        load_dotenv(override=True)
         api_key = os.environ.get("GOOGLE_API_KEY")
+        
         if not api_key:
-            raise ValueError("GOOGLE_API_KEY not found or is empty in your .env file.")
-        genai.configure(api_key=api_key) # type: ignore
+            print("🛑 ERROR: GOOGLE_API_KEY not found.")
+            return None
+            
+        genai.configure(api_key=api_key)
     except Exception as e:
         print(f"🛑 CONFIGURATION ERROR: {e}")
         return None
-    # --- END OF FIX ---
     
     generation_config = genai.GenerationConfig(response_mime_type="application/json")
-    model = genai.GenerativeModel('gemini-pro-latest', generation_config=generation_config)
+    model = genai.GenerativeModel('gemini-2.5-flash', generation_config=generation_config)
     
     current_skills = extracted_data.get('skills', [])
 
@@ -109,9 +122,19 @@ def get_career_roadmap(extracted_data: dict, target_job_profile: str) -> list | 
     Create 3-5 logical phases, starting from their current skills and ending at their target job.
     """
     
-    try:
-        response = model.generate_content(prompt)
-        return json.loads(response.text)
-    except Exception as e:
-        print(f"🛑 An unexpected error occurred during roadmap generation: {e}")
-        return None
+    # Retry logic for handling 429 errors
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = model.generate_content(prompt)
+            return json.loads(response.text)
+        except Exception as e:
+            if "429" in str(e):
+                print(f"⚠️ Quota exceeded. Retrying in {2 * (attempt + 1)} seconds... (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(2 * (attempt + 1))
+            else:
+                print(f"🛑 An unexpected error occurred during roadmap generation: {e}")
+                return None
+
+    print("🛑 Failed to get roadmap after multiple retries.")
+    return None
